@@ -1,15 +1,34 @@
 const dsteem = require('dsteem');
-const exchange = getExternalExchangeApi();  // TODO
+const exchange = getExternalExchangeApi();  // TODO: Replace with actual exchange API
 
 const stabilizerAccount = "steemstabilizer";
 const daoAccount = "steem.dao";
 
 const client = new dsteem.Client('https://api.steemit.com');
 
+// Function to simulate sleep
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// Function to broadcast a transaction
+async function broadcastTransaction(account, operations) {
+  const privateKey = dsteem.PrivateKey.fromString('your-private-key-here');  // Replace with actual private key
+
+  try {
+    // Broadcast the operations
+    await client.broadcast.send({
+      operations: operations,
+      key: privateKey,
+    });
+
+    console.log('Transaction successful');
+  } catch (error) {
+    console.error('Error broadcasting transaction:', error);
+  }
+}
+
+// Main function with the core logic
 async function main() {
   while (true) {
     const a = await client.database.getAccounts([stabilizerAccount]);
@@ -73,10 +92,12 @@ async function convertSbdToSteem(account, amount) {
       amount: `${amount.toFixed(3)} SBD`
     }]
   ];
-  await client.broadcast.sendOperations(operations, account);
+
+  await broadcastTransaction(account, operations);
   console.log(`Converted ${amount.toFixed(3)} SBD to STEEM`);
 }
 
+// Function to transfer SBD to DAO account
 async function transferSbd(fromAccount, toAccount, amount) {
   const operations = [
     ['transfer', {
@@ -86,10 +107,12 @@ async function transferSbd(fromAccount, toAccount, amount) {
       memo: ''
     }]
   ];
-  await client.broadcast.sendOperations(operations, fromAccount);
+
+  await broadcastTransaction(fromAccount, operations);
   console.log(`Transferred ${amount.toFixed(3)} SBD from ${fromAccount} to ${toAccount}`);
 }
 
+// Function to convert STEEM to SBD
 async function convertSteemToSbd(account, amount) {
   const operations = [
     ['convert', {
@@ -97,10 +120,12 @@ async function convertSteemToSbd(account, amount) {
       amount: `${amount.toFixed(3)} STEEM`
     }]
   ];
-  await client.broadcast.sendOperations(operations, account);
+
+  await broadcastTransaction(account, operations);
   console.log(`Converted ${amount.toFixed(3)} STEEM to SBD`);
 }
 
+// Function to transfer STEEM to DAO account
 async function transferSteem(fromAccount, toAccount, amount) {
   const operations = [
     ['transfer', {
@@ -110,10 +135,12 @@ async function transferSteem(fromAccount, toAccount, amount) {
       memo: ''
     }]
   ];
-  await client.broadcast.sendOperations(operations, fromAccount);
+
+  await broadcastTransaction(fromAccount, operations);
   console.log(`Transferred ${amount.toFixed(3)} STEEM from ${fromAccount} to ${toAccount}`);
 }
 
+// Function to create an order (buy or sell)
 async function createOrder(account, sellAmount, buyAmount) {
   const operations = [
     ['limit_order_create', {
@@ -124,10 +151,12 @@ async function createOrder(account, sellAmount, buyAmount) {
       expiration: Math.floor(Date.now() / 1000) + 60 * 15
     }]
   ];
-  await client.broadcast.sendOperations(operations, account);
+
+  await broadcastTransaction(account, operations);
   console.log(`Created an order: Sell ${sellAmount}, Buy ${buyAmount}`);
 }
 
+// Function to claim rewards
 async function claimRewards(account, rewardSteem, rewardSbd, rewardVests) {
   const operations = [
     ['claim_reward_balance', {
@@ -137,10 +166,12 @@ async function claimRewards(account, rewardSteem, rewardSbd, rewardVests) {
       reward_vests: rewardVests.amount.toFixed(3)
     }]
   ];
-  await client.broadcast.sendOperations(operations, account);
+
+  await broadcastTransaction(account, operations);
   console.log(`Claimed rewards: ${rewardSteem.amount.toFixed(3)} STEEM, ${rewardSbd.amount.toFixed(3)} SBD, ${rewardVests.amount.toFixed(3)} VESTS`);
 }
 
+// Function to withdraw vesting shares
 async function withdrawVesting(account, amount) {
   const operations = [
     ['withdraw_vesting', {
@@ -148,8 +179,10 @@ async function withdrawVesting(account, amount) {
       vesting_shares: amount.toFixed(3)
     }]
   ];
-  await client.broadcast.sendOperations(operations, account);
+
+  await broadcastTransaction(account, operations);
   console.log(`Withdrew ${amount.toFixed(3)} VESTS from ${account}`);
 }
 
+// Start the process
 main().catch(console.error);
